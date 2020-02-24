@@ -6,17 +6,15 @@ public class SortingMenu {
     private static Scanner input = new Scanner(System.in);
     private static Integer[] numbers = new Integer[10000];
 
-    private static Integer[] helper;
-
-    private static int number;
-
-    private static Integer[] values;
-
     public static void main(String[] args) {
         int iterationCounter = 0;
         long sortStart = 0;
         long sortEnd = 0;
 
+        int left  = 0;
+        int right = 0;
+        int low = 0;
+        int high = 0;
    
         generateNumbers(numbers); // calls method which will process dataset (the static array)
 
@@ -37,12 +35,15 @@ public class SortingMenu {
                     break;
                 case 4:
                     sortStart = System.currentTimeMillis();
-                    sort(numbers, values, helper, number);
+                    mergeSort(numbers);
                     sortEnd = System.currentTimeMillis();
                     showResults(iterationCounter, sortStart, sortEnd);
                     break;
                 case 5:
-                    quickSort(numbers, iterationCounter, sortStart, sortEnd);
+                    sortStart = System.currentTimeMillis();
+                    quickSort(numbers, left, right);
+                    sortEnd = System.currentTimeMillis();
+                    showResults(iterationCounter, sortStart, sortEnd);
                     break;
             }
         }
@@ -93,15 +94,15 @@ public class SortingMenu {
         showResults(iterationCounter, sortStart, sortEnd);
     }
 
-    // insertion sort removes an element from array, compares it w/ the largest value and then places it accordingly
+    // insertion sort uses two portions in which the elements from the unsorted portion are correctly inserted into the sorted portion
     public static void insertionSort(Integer[] numbers, int iterationCounter, long sortStart, long sortEnd) { // uses incremental approach
         int numLength = numbers.length;
         int temp = 0;
        
         sortStart = System.currentTimeMillis();
-        for (int i = 1; i < numLength - 1; i++) {
-            temp = numbers[i]; // item to insert
-            int j = i -1;
+        for (int i = 1; i < numLength - 1; i++) { // iterate thru the array starting from the second and not first element
+            temp = numbers[i]; // the element that is currently being inserted
+            int j = i - 1;
 
             // if value happens to be larger, insert item (temp)
             while (j >= 0 && numbers[j] > temp) {
@@ -141,75 +142,81 @@ public class SortingMenu {
         showResults(iterationCounter, sortStart, sortEnd);
     }
 
-
-
-
-
-
-
-    public static void sort(Integer[] numbers, Integer[] values, Integer[] helper, int number) {
-        numbers = values;
-        number = values.length;
-        helper = new Integer[number];
-        mergeSort(0, number - 1);
-    }
     // merge sort divides array into two halves & recursively calls itself to further subdivide, sort, then re-merge
-    public static void mergeSort(int low, int high) { // uses divide-and-conquer approach
-         // check if low is smaller than high, if not then the array is sorted
-         if (low < high) {
-            // Get the index of the element which is in the middle
-            int middle = low + (high - low) / 2;
-            // Sort the left side of the array
-            mergeSort(low, middle);
-            // Sort the right side of the array
-            mergeSort(middle + 1, high);
-            // Combine them both
-            merge(low, middle, high);
-        }
-    }
-    public static void merge(int low, int middle, int high) {
-        // Copy both parts into the helper array
-        for (int i = low; i <= high; i++) {
-            helper[i] = numbers[i];
-        }
-
-        int i = low;
-        int j = middle + 1;
-        int k = low;
-        // Copy the smallest values from either the left or the right side back
-        // to the original array
-        while (i <= middle && j <= high) {
-            if (helper[i] <= helper[j]) {
-                numbers[k] = helper[i];
-                i++;
-            } else {
-                numbers[k] = helper[j];
-                j++;
-            }
-            k++;
-        }
-        // Copy the rest of the left side of the array into the target array
-        while (i <= middle) {
-            numbers[k] = helper[i];
-            k++;
-            i++;
-        }
-        // Since we are sorting in-place any leftover elements from the right side
-        // are already at the right position.
-    }
-
-
-
-
+    public static Integer[] mergeSort(Integer[] numbers){
+		Integer[] sorted = Arrays.copyOf(numbers, numbers.length);
+	    if (sorted.length == 1){
+	        return sorted;
+	    }
+	    int length = sorted.length/2;
+	    Integer[] left = new Integer[length];
+	    Integer[] right = new Integer[sorted.length - length];
+	
+	    for (int i = 0; i < length; i++)
+	        left[i] = sorted[i];
+	    for (int i = length; i < sorted.length; i++)
+	        right[i-length] = sorted[i];
+	
+	    return merge(mergeSort(left),mergeSort(right));
+	}
+    public static Integer[] merge(Integer[] left, Integer[] right){
+	    Integer[] sorted = new Integer[left.length+right.length];
+	    int left_length = left.length;
+	    int right_length = right.length;
+	    
+	    while (left_length > 0 && right_length > 0){
+	        if (left[left.length - left_length] < right[right.length - right_length]){
+	        	sorted[sorted.length -left_length-right_length] = left[left.length - left_length];
+	            left_length--;
+	        }
+	        else{
+	        	sorted[sorted.length - left_length-right_length] = right[right.length - right_length];
+	        	right_length--;
+	        }	       
+	    }
+	    while (left_length > 0){
+	    	sorted[sorted.length - left_length] = left[left.length-left_length];
+	        left_length--;
+	    } 
+	    while (right_length > 0){
+	    	sorted[sorted.length - right_length] = right[right.length-right_length];
+	        right_length--;
+	    }
+	    return sorted;
+	}
 
     // quick sort picks an element as pivot and partitions the given array around the chosen pivot
-    public static void quickSort(Integer[] numbers, int iterationCounter, long sortStart, long sortEnd) { // uses divide-and-conquer approach
-        sortStart = System.currentTimeMillis();
-       
-        // TO-DO *****************************************************
-       
-        sortEnd = System.currentTimeMillis();
-        showResults(iterationCounter, sortStart, sortEnd);
+    public static int partition(Integer[] numbers, int left, int right){
+		int tempArr;
+		int pivot = numbers[(left + right) / 2];
+		
+		while(left <= right){
+			while(numbers[left] < pivot){
+				left++;
+			}
+			while(numbers[right] > pivot){
+				right--;
+			}
+			if(left <= right){
+				tempArr = numbers[left];
+				numbers[left] = numbers[right];
+				numbers[right] = tempArr;
+				left++;
+				right--;
+			}
+		}
+		return left;
+	}
+    
+    public static void quickSort(Integer[] numbers, int left, int right) { // uses divide-and-conquer approach
+        int indx = partition(numbers, left, right);
+		
+		if(left < indx -1){
+			quickSort(numbers, left, indx - 1);
+		}
+		if(indx < right){
+			quickSort(numbers, indx, right);
+		}
     }
    
     public static void showResults(int iterationCounter, long sortStart, long sortEnd) {
@@ -218,3 +225,6 @@ public class SortingMenu {
     }
 
 }
+
+
+
