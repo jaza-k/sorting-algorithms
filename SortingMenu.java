@@ -10,11 +10,6 @@ public class SortingMenu {
         int iterationCounter = 0;
         long sortStart = 0;
         long sortEnd = 0;
-
-        int left  = 0;
-        int right = 0;
-        int low = 0;
-        int high = 0;
    
         generateNumbers(numbers); // calls method which will process dataset (the static array)
 
@@ -33,17 +28,21 @@ public class SortingMenu {
                 case 3:
                     selectionSort(numbers, iterationCounter, sortStart, sortEnd);
                     break;
+                // separate classes and object creation necessary for cases 4/5 because of recursive nature (different parameters)
                 case 4:
                     sortStart = System.currentTimeMillis();
-                    mergeSort(numbers);
+                    MergeSort mergeObject = new MergeSort();
+                    mergeObject.mergeSort(numbers, 0, (numbers.length - 1));
                     sortEnd = System.currentTimeMillis();
                     showResults(iterationCounter, sortStart, sortEnd);
                     break;
                 case 5:
                     sortStart = System.currentTimeMillis();
-                    quickSort(numbers, left, right);
+                    QuickSort quickObject = new QuickSort();
+                    quickObject.quickSort(numbers, 0, numbers.length - 1);
                     sortEnd = System.currentTimeMillis();
-                    showResults(iterationCounter, sortStart, sortEnd);
+                    System.out.print(Arrays.toString(numbers) + "\n\nArray sorted! This method took " + QuickSort.quickSort(numbers, 0, 0) + " iterations. ");
+                    System.out.println("Time taken was " + (sortEnd - sortStart) + " ms.");
                     break;
             }
         }
@@ -80,7 +79,7 @@ public class SortingMenu {
 
         sortStart = System.currentTimeMillis();
         for (int i = 0; i < numLength; i++) {
-            for (int j = 1; j < (numLength - 1); j++) {
+            for (int j = 1; j < (numLength - (i + 1)); j++) {
                 if (numbers[j-1] > numbers[j]) { // if number is smaller, swap numbers[j] and numbers[j-1]
                     temp = numbers[j-1];
                     numbers[j-1] = numbers[j];
@@ -127,7 +126,7 @@ public class SortingMenu {
         for (int i = 0; i < numLength; i++) {
             min = numbers[i];
             minIndex = i;
-            for (int j = i + 1; j < numLength; j++) { // find minimum
+            for (int j = i + 1; j < numLength; j++) { // find the minimum value
                 if (numbers[j] < min) {
                     min = numbers[j];
                     minIndex= j;
@@ -142,89 +141,8 @@ public class SortingMenu {
         showResults(iterationCounter, sortStart, sortEnd);
     }
 
-    // merge sort divides array into two halves & recursively calls itself to further subdivide, sort, then re-merge
-    public static Integer[] mergeSort(Integer[] numbers){
-		Integer[] sorted = Arrays.copyOf(numbers, numbers.length);
-	    if (sorted.length == 1){
-	        return sorted;
-	    }
-	    int length = sorted.length/2;
-	    Integer[] left = new Integer[length];
-	    Integer[] right = new Integer[sorted.length - length];
-	
-	    for (int i = 0; i < length; i++)
-	        left[i] = sorted[i];
-	    for (int i = length; i < sorted.length; i++)
-	        right[i-length] = sorted[i];
-	
-	    return merge(mergeSort(left),mergeSort(right));
-	}
-    public static Integer[] merge(Integer[] left, Integer[] right){
-	    Integer[] sorted = new Integer[left.length+right.length];
-	    int left_length = left.length;
-	    int right_length = right.length;
-	    
-	    while (left_length > 0 && right_length > 0){
-	        if (left[left.length - left_length] < right[right.length - right_length]){
-	        	sorted[sorted.length -left_length-right_length] = left[left.length - left_length];
-	            left_length--;
-	        }
-	        else{
-	        	sorted[sorted.length - left_length-right_length] = right[right.length - right_length];
-	        	right_length--;
-	        }	       
-	    }
-	    while (left_length > 0){
-	    	sorted[sorted.length - left_length] = left[left.length-left_length];
-	        left_length--;
-	    } 
-	    while (right_length > 0){
-	    	sorted[sorted.length - right_length] = right[right.length-right_length];
-	        right_length--;
-	    }
-	    return sorted;
-	}
-
-    // quick sort picks an element as pivot and partitions the given array around the chosen pivot
-    public static int partition(Integer[] numbers, int left, int right){
-		int tempArr;
-		int pivot = numbers[(left + right) / 2];
-		
-		while(left <= right){
-			while(numbers[left] < pivot){
-				left++;
-			}
-			while(numbers[right] > pivot){
-				right--;
-			}
-			if(left <= right){
-				tempArr = numbers[left];
-				numbers[left] = numbers[right];
-				numbers[right] = tempArr;
-				left++;
-				right--;
-			}
-		}
-		return left;
-	}
-    
-    public static void quickSort(Integer[] numbers, int left, int right) { // uses divide-and-conquer approach
-        int indx = partition(numbers, left, right);
-		
-		if(left < indx -1){
-			quickSort(numbers, left, indx - 1);
-		}
-		if(indx < right){
-			quickSort(numbers, indx, right);
-		}
-    }
-   
     public static void showResults(int iterationCounter, long sortStart, long sortEnd) {
         System.out.print(Arrays.toString(numbers) + "\n\nArray sorted! This method took " + iterationCounter + " iterations. ");
         System.out.println("Time taken was " + (sortEnd - sortStart) + " ms.");
     }
-
 }
-
-
-
